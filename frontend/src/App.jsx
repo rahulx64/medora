@@ -9,12 +9,13 @@ import Myprofile from './pages/Myprofile';
 import Myappointments from './pages/Myappointments';
 import Appointment from './pages/Appointment';
 import Navbar from './components/Navbar';
+import Footer from "../src/components/Footer"
 
 const App = () => {
   return (
     <>
       <div className="mx-4 sm:mx-[10%]">
-        <Navbar/>
+        <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/doctors" element={<Doctors />} />
@@ -24,8 +25,9 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/my-profile" element={<Myprofile />} />
           <Route path="/my-appointment" element={<Myappointments />} />
-          <Route path="/appointment/:docId" element={<Appointment/>} />
+          <Route path="/appointment/:docId" element={<Appointment />} />
         </Routes>
+        <Footer />
       </div>
     </>
   );
