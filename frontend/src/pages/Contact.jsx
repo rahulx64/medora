@@ -1,20 +1,53 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { assets } from '../assets/assets_frontend/assets'
+import emailjs from '@emailjs/browser'
 
 const Contact = () => {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  // Initialize EmailJS on component mount
+  useEffect(() => {
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY_HERE'
+    emailjs.init(publicKey)
+  }, [])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+    setError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // For now we just simulate submission
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 4000)
-    setForm({ name: '', email: '', message: '' })
+    setLoading(true)
+    setError('')
+
+    try {
+      const templateParams = {
+        to_email: 'support@medora.com',
+        from_name: form.name,
+        from_email: form.email,
+        message: form.message,
+        reply_to: form.email,
+      }
+
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID',
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID',
+        templateParams
+      )
+
+      setSubmitted(true)
+      setForm({ name: '', email: '', message: '' })
+      setTimeout(() => setSubmitted(false), 4000)
+    } catch (err) {
+      console.error('Email send error:', err)
+      setError('Failed to send message. Please try again or email us directly.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -112,8 +145,11 @@ const Contact = () => {
               </div>
 
               <div className="flex items-center gap-4">
-                <button type="submit" className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold shadow hover:from-green-600 hover:to-green-700 transition">Send Message</button>
-                {submitted && <span className="text-sm text-green-600">Thanks — we received your message.</span>}
+                <button type="submit" disabled={loading} className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold shadow hover:from-green-600 hover:to-green-700 transition disabled:opacity-50">
+                  {loading ? 'Sending...' : 'Send Message'}
+                </button>
+                {submitted && <span className="text-sm text-green-600">✓ Thanks — we received your message.</span>}
+                {error && <span className="text-sm text-red-600">{error}</span>}
               </div>
             </form>
           </div>

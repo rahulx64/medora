@@ -122,8 +122,12 @@ const About = () => {
           <h3 className="text-3xl font-bold mb-3">Ready to find the right doctor?</h3>
           <p className="mb-6 text-green-100">Start by browsing specialists or book an appointment instantly.</p>
           <div className="flex justify-center gap-4">
-            <button className="bg-white text-green-700 px-6 py-3 rounded-lg font-bold">Browse Doctors</button>
-            <button className="bg-white/20 border border-white/30 px-6 py-3 rounded-lg font-semibold">Contact Us</button>
+            <button onClick={()=>{
+              navigate('/doctors');
+            }}  className="bg-white text-green-700 px-6 py-3 rounded-lg font-bold">Browse Doctors</button>
+            <button onClick={()=>{
+              navigate('/contact');
+            }} className="bg-white/20 border border-white/30 px-6 py-3 rounded-lg font-semibold">Contact Us</button>
           </div>
         </div>
       </div>
