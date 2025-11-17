@@ -1,6 +1,107 @@
-import React, { useContext, useMemo } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useContext, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Appcontext } from "../context/AppContext";
+
+import { useState } from "react";
+
+const generateNext7Days = () => {
+  const days = [];
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    days.push(date);
+  }
+  return days;
+};
+
+const generateTimeSlots = () => {
+  // 10 PM to 5 AM (next day), 1 hour slots
+  const slots = [];
+  let start = new Date();
+  start.setHours(22, 0, 0, 0); // 10 PM
+  for (let i = 0; i < 7; i++) {
+    const slot = new Date(start);
+    slot.setHours(start.getHours() + i);
+    if (slot.getHours() >= 22 || slot.getHours() < 5) {
+      slots.push(slot);
+    }
+  }
+  return slots.slice(0, 6); // 5-6 slots
+};
+
+const TimeSlotSelector = () => {
+  const [selectedDate, setSelectedDate] = useState(generateNext7Days()[0]);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+
+  const days = generateNext7Days();
+  const slots = generateTimeSlots();
+  console.log("********************");
+  console.log(selectedDate);
+  console.log(selectedSlot);
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-4 overflow-x-auto">
+        {days.map((day, idx) => (
+          <button
+            key={idx}
+            onClick={() => {
+              setSelectedDate(day);
+              setSelectedSlot(null);
+            }}
+            className={`px-4 py-2 rounded-lg font-semibold border ${
+              selectedDate.toDateString() === day.toDateString()
+                ? "bg-green-600 text-white"
+                : "bg-white text-gray-800 border-green-200 hover:bg-green-100"
+            }`}
+          >
+            {day.toLocaleDateString(undefined, {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            })}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-2 flex-wrap">
+        {slots.map((slot, idx) => {
+          // Adjust slot date to selected date
+          const slotDate = new Date(selectedDate);
+          slotDate.setHours(slot.getHours(), slot.getMinutes(), 0, 0);
+          // If slot hour is < 10, it's next day (after midnight)
+          if (slot.getHours() < 10) slotDate.setDate(slotDate.getDate() + 1);
+          const label = slotDate.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          return (
+            <button
+              key={idx}
+              onClick={() => setSelectedSlot(slotDate)}
+              className={`px-4 py-2 rounded-lg font-semibold border ${
+                selectedSlot && selectedSlot.getTime() === slotDate.getTime()
+                  ? "bg-green-500 text-white"
+                  : "bg-white text-gray-800 border-green-200 hover:bg-green-100"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      {selectedSlot && (
+        <div className="mt-4 text-green-700 font-semibold">
+          Selected: {selectedDate.toLocaleDateString()} at{" "}
+          {selectedSlot.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Appointment = () => {
   const { docId } = useParams();
@@ -9,24 +110,28 @@ const Appointment = () => {
 
   // Find the selected doctor
   const doctor = useMemo(() => {
-    return doctors.find(doc => doc._id === docId);
+    return doctors.find((doc) => doc._id === docId);
   }, [docId, doctors]);
 
   // Find similar doctors based on speciality
   const similarDoctors = useMemo(() => {
     if (!doctor) return [];
-    return doctors.filter(
-      doc => doc.speciality === doctor.speciality && doc._id !== docId
-    ).slice(0, 4);
+    return doctors
+      .filter(
+        (doc) => doc.speciality === doctor.speciality && doc._id !== docId
+      )
+      .slice(0, 4);
   }, [doctor, doctors, docId]);
 
   if (!doctor) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-50">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Doctor Not Found</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            Doctor Not Found
+          </h2>
           <button
-            onClick={() => navigate('/doctors')}
+            onClick={() => navigate("/doctors")}
             className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-all"
           >
             Back to Doctors
@@ -44,8 +149,18 @@ const Appointment = () => {
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-green-600 hover:text-green-700 font-semibold mb-8 transition-colors"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           Back
         </button>
@@ -58,14 +173,16 @@ const Appointment = () => {
               <div className="w-full max-w-xs rounded-2xl overflow-hidden shadow-xl mb-6 border-4 border-green-100 hover:border-green-300 transition-colors">
                 <img
                   src={doctor.image}
-                  alt={doctor.name}
+                  // add a useState hook for selecting time from current to next 7 days and add time schedule of 5 to 6 slots between 10 pm to 5 am of 1 hour slot time
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="w-full text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <span className="inline-flex h-3 w-3 rounded-full bg-green-500 animate-pulse"></span>
-                  <span className="text-sm font-semibold text-green-600">Available Now</span>
+                  <span className="text-sm font-semibold text-green-600">
+                    Available Now
+                  </span>
                 </div>
               </div>
             </div>
@@ -74,7 +191,9 @@ const Appointment = () => {
             <div className="md:col-span-2 flex flex-col justify-between">
               {/* Name & Title */}
               <div className="mb-6">
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">{doctor.name}</h1>
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                  {doctor.name}
+                </h1>
                 <div className="flex flex-wrap items-center gap-4 mb-4">
                   <span className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold text-sm">
                     {doctor.speciality}
@@ -89,14 +208,18 @@ const Appointment = () => {
               <div className="grid grid-cols-2 gap-4 mb-6 bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-2xl">
                 <div>
                   <p className="text-gray-600 text-sm mb-1">Experience</p>
-                  <p className="text-2xl font-bold text-gray-900">{doctor.experience}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {doctor.experience}
+                  </p>
                 </div>
                 <div>
                   <p className="text-gray-600 text-sm mb-1">Rating</p>
                   <div className="flex items-center gap-2">
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
-                        <span key={i} className="text-yellow-400">★</span>
+                        <span key={i} className="text-yellow-400">
+                          ★
+                        </span>
                       ))}
                     </div>
                     <span className="text-lg font-bold text-gray-900">4.8</span>
@@ -116,7 +239,9 @@ const Appointment = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
                 <div>
                   <p className="text-gray-600 text-sm mb-2">Consultation Fee</p>
-                  <p className="text-3xl font-bold text-green-600">${doctor.fees}</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    ${doctor.fees}
+                  </p>
                 </div>
                 <div>
                   <p className="text-gray-600 text-sm mb-2">Clinic Address</p>
@@ -133,6 +258,16 @@ const Appointment = () => {
               </button>
             </div>
           </div>
+
+          {/* Appointment Time Selection */}
+          <div className=" ml-5 mb-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
+              Select Appointment Time
+            </h3>
+            <div className="ml-5">
+              <TimeSlotSelector />
+            </div>
+          </div>
         </div>
 
         {/* Similar Doctors Section */}
@@ -140,16 +275,22 @@ const Appointment = () => {
           <div className="mt-20">
             <div className="mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-2">
-                Similar Doctors in <span className="text-green-600">{doctor.speciality}</span>
+                Similar Doctors in{" "}
+                <span className="text-green-600">{doctor.speciality}</span>
               </h2>
-              <p className="text-gray-600 text-lg">Other specialist doctors you might be interested in</p>
+              <p className="text-gray-600 text-lg">
+                Other specialist doctors you might be interested in
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {similarDoctors.map((item) => (
                 <div
                   key={item._id}
-                  onClick={() => navigate(`/appointment/${item._id}`)}
+                  onClick={() => {
+                    navigate(`/appointment/${item._id}`);
+                    scrollTo(0, 0);
+                  }}
                   className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 border border-green-100 hover:border-green-300"
                 >
                   {/* Doctor Image */}
@@ -170,7 +311,9 @@ const Appointment = () => {
                         <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></span>
                         <span className="inline-flex h-2.5 w-2.5 rounded-full bg-green-400"></span>
                       </div>
-                      <span className="text-xs font-semibold text-green-600">Available</span>
+                      <span className="text-xs font-semibold text-green-600">
+                        Available
+                      </span>
                     </div>
 
                     {/* Name & Speciality */}
@@ -185,9 +328,13 @@ const Appointment = () => {
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-1">
                         <span className="text-yellow-400">★</span>
-                        <span className="text-sm font-semibold text-gray-700">4.8</span>
+                        <span className="text-sm font-semibold text-gray-700">
+                          4.8
+                        </span>
                       </div>
-                      <span className="text-xs text-gray-500">{item.experience}</span>
+                      <span className="text-xs text-gray-500">
+                        {item.experience}
+                      </span>
                     </div>
 
                     {/* View Profile Button */}
@@ -204,7 +351,9 @@ const Appointment = () => {
         {/* No Similar Doctors Message */}
         {similarDoctors.length === 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <p className="text-gray-600 text-lg">No other doctors in this speciality at the moment.</p>
+            <p className="text-gray-600 text-lg">
+              No other doctors in this speciality at the moment.
+            </p>
           </div>
         )}
       </div>
@@ -213,4 +362,3 @@ const Appointment = () => {
 };
 
 export default Appointment;
-
