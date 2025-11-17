@@ -36,14 +36,7 @@ const Doctors = () => {
 
   return (
     <div className="pt-20 pb-10 px-4 sm:px-6 lg:px-8 min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50">
-      {/* Header Section */}
-      {/* <div className="max-w-7xl mx-auto mb-2">
-        <h3 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-          Find Your <span className="text-green-600">Perfect Doctor</span>
-        </h3>
-      
-      </div> */}
-
+     
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar - Speciality Filter */}
@@ -70,12 +63,17 @@ const Doctors = () => {
                 {specialities.map((spec) => (
                   <button
                     key={spec}
-                    onClick={() => setSelectedSpeciality(spec)}
+                    onClick={() => {setSelectedSpeciality(spec);
+                      navigate(`/doctors/${spec}`)
+                    }
+                    }
                     className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 ${
                       selectedSpeciality === spec
                         ? "bg-green-600 text-white shadow-md scale-105"
                         : "bg-gray-100 text-gray-700 hover:bg-green-50 hover:text-green-600"
                     }`}
+
+                  
                   >
                     {spec}
                   </button>
