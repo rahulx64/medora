@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { assets } from '../assets/assets_frontend/assets'
 import emailjs from '@emailjs/browser'
-
+import { useNavigate } from 'react-router-dom'
 const Contact = () => {
+  const navigate=useNavigate();
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -160,7 +161,9 @@ const Contact = () => {
           <h3 className="text-2xl font-bold mb-2">Need a quick answer?</h3>
           <p className="mb-4 text-green-100">Call our support or start a live chat to get instant help.</p>
           <div className="flex justify-center gap-4">
-            <a href="tel:+15551234567" className="bg-white text-green-700 px-6 py-3 rounded-lg font-bold">Call Us</a>
+            <button onClick={()=>{
+              navigate("/carrier");
+            }} className="bg-white text-green-700 px-6 py-3 rounded-lg font-bold">carrier</button>
             <a href="#" className="bg-white/20 border border-white/30 px-6 py-3 rounded-lg font-semibold">Start Chat</a>
           </div>
         </div>
