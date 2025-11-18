@@ -4,11 +4,12 @@
   "description": "a backend service for my doctor appointment booking application there are certain thing i need to do to get this product right working thanku",
   "license": "ISC",
   "author": "rahul ranjan",
-  "type": "commonjs",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "server": "nodemon server.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
