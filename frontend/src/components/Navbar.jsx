@@ -6,7 +6,7 @@ const Navbar = () => {
   const navigate1 = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const [token, setToken] = useState(true);
-
+  const [hide, sethide] = useState(true);
   return (
     <>
       {/* NAVBAR */}
@@ -39,15 +39,27 @@ const Navbar = () => {
         </ul>
 
         {/* Profile + Buttons */}
-        <div className="flex items-center gap-4">
+        <div className="  flex items-center gap-4">
           {/* If logged in */}
           {token ? (
-            <div className="flex items-center gap-2 cursor-pointer group relative">
+            <div
+              onClick={() => {
+                sethide(!hide);
+              }}
+              className={`flex items-center gap-2 cursor-pointer group relative   `}
+            >
               <img className="w-8 rounded-full" src={assets.profile_pic} />
               <img className="w-3" src={assets.dropdown_icon} />
 
               {/* Hover dropdown */}
-              <div className="absolute top-10 right-0 text-base font-medium text-gray-700 bg-white shadow-lg rounded-lg p-4 w-44 hidden group-hover:block z-20">
+              <div
+                className={`absolute top-10 right-0 text-base font-medium text-gray-700 bg-white shadow-lg rounded-lg p-4 w-44  z-20 ${
+                  hide ? "hidden" : "m-0"
+                } `}
+                onClick={() => {
+                  sethide(!hide);
+                }}
+              >
                 <p
                   onClick={() => navigate1("/my-profile")}
                   className="hover:text-black cursor-pointer"
