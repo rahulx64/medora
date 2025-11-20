@@ -1,0 +1,6 @@
+socket io is choose best low level transport protoclol 
+http long pooling
+web socket 
+web transport
+
+although socketio uses 
